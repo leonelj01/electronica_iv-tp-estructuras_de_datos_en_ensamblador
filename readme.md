@@ -12,7 +12,7 @@ Si completas este trabajo práctico con éxito lograrás:
 2. Entender y explicar el proceso que sigues al resolver cada problema, las
    fuentes que consultas y las dificultades que encuentras en el camino.
 3. Implementar operaciones básicas para trabajar con con las estructuras de
-   datos: registro, arreglo, pila y cola.
+   datos: arreglo, pila y cola.
 4. Escribir programas en lenguaje ensamblador para la arquitectura ARMv7M que
    implementan los algoritmos encontrados o desarrollados.
 5. Utilizar herramientas de desarrollo para compilar, cargar y ejecutar
@@ -52,20 +52,23 @@ de bytes. Estas regiones las llamaremos *origen* y *destino*. Debes copiar los
 valores de *origen* en *destino*. Si las regiones se solapan, *destino* debe
 tener al terminar una copia íntegra de los datos (en ese caso *origen* ya no
 la tendrá, por eso es mover y no copiar). Tu solución será en la forma de la
-función `mueveMemoria` cuyo uso se ejemplifica en el Listado 1.
+función `mueveMemoria` cuyo uso se ejemplifica en el Listado 1. Ubica tu
+solución en `lib/ops_memoria/mueve.S`.
 
 Listado 1: Prototipo de la funcion `mueveMemoria`  
 
 ```c
 #include "serie.h"
 
-// Prototipo de tu función
+#include "ops_memoria.h"
+
+/* En ops_memoria.h
 void mueveMemoria(void *destino,const void *origen, size_t tamano);
+*/ 
 
 static char origen[] = "Hola Mundo12345";
 
 void listado_1(void){
-    Serie_init(9600);
     const size_t tamano = 4+1+5; // Cantidad de caracteres en "Hola Mundo"
     mueveMemoria(origen+5,origen,tamano);
     Serie_enviaCadena(origen); // Transmite "Hola Hola Mundo"
@@ -96,7 +99,7 @@ un valor entero. El valor retornado será $0$ si los contenidos de las regiones
 son *iguales*, $-1$ si el primer byte distinto es *menor* en *izquierda* que en
 *derecha* y $1$ si el primer byte distinto es *mayor* en *izquierda* que en
 *derecha*. Tu solución será en la forma de la función `comparaMemoria` cuyo uso
-se ejemplifica en el Listado 2.
+se ejemplifica en el Listado 2. Ubica tu solución en `lib/ops_memoria/compara.S`
 
 Listado 2:
 
@@ -104,8 +107,11 @@ Listado 2:
 #include <stdint.h>
 #include "serie.h"
 
-// Prototipo de tu función
+#include "ops_memoria.h"
+
+/* Prototipo en ops_memoria.h
 int comparaMemoria(const void *izquierda,const void *derecha, size_t tamano);
+*/
 
 uint8_t a1[]={0,1,2,3};
 uint8_t a2[]={0,1,3,5};
@@ -113,7 +119,6 @@ uint8_t a3[]={0,1,2,3};
 size_t tamano = 4;
 
 void listado_2(void){
-    Serie_init(9600);
     const int comp1 = comparaMemoria(a1,a3,tamano);
     const int comp2 = comparaMemoria(a1,a2,tamano);
     const int comp3 = comparaMemoria(a2,a3,tamano);
@@ -122,35 +127,6 @@ void listado_2(void){
     Serie_enviaEntero(comp2); // envia "-1"
     Serie_enviaNuevaLinea();
     Serie_enviaEntero(comp3); // envia "1"
-    Serie_enviaNuevaLinea();
-}
-```
-
-### Intercambia enteros de 32 bit
-
-Dado un arreglo de enteros de 32 bit y dos posiciones *i* y *j* correspondientes
-a elementos válidos del mismo, intercambia los valores ubicados en dichas
-posiciones. Osea, luego del intercambio `arreglo[i]` tendrá el valor que
-originalmente tenía `arreglo[j]` y viceversa. El Listado 3 presenta un ejemplo
-de uso.
-
-Listado 3: Ejemplo de uso de `intercambiaElementos`
-
-```c
-#include <stdint.h>
-#include "serie.h"
-
-// Prototipo de tu función
-void intercambiaElementos(int32_t *arreglo, int i, int j);
-
-static int miArreglo[]={0,1,2,3,4,5};
-static const size_t tamano = sizeof(miArreglo)/sizeof(*miArreglo); // 6
-
-void listado_3(void){
-    Serie_init(9600);
-    intercambiaElementos(miArreglo,0,3);
-    intercambiaElementos(miArreglo,2,5);
-    Serie_enviaArreglo_int32(miArreglo,tamano); // Envía "3 1 5 0 4 2"
     Serie_enviaNuevaLinea();
 }
 ```
@@ -166,53 +142,44 @@ las siguientes operaciones:
 
 - Inicializar un descriptor de arreglo
 - Obtener un puntero a un elemento del arreglo
-- Leer (copiar el valor de) un elemento del arreglo
-- Escribir (copiar un valor en) un elemento del arreglo
+- Leer un elemento del arreglo
+- Escribir un elemento del arreglo
+- Intercambiar los valores de dos elementos del arreglo
 
-En el Listado 4 verás un sencillo ejemplo de uso.
+En el Listado 3 verás un sencillo ejemplo de uso. Tu implementación irá en
+`lib/arreglo/arreglo.S`
 
-Listado 4. Ejemplo de uso de funciones de manipulación de arreglo de propósito
+Listado 3. Ejemplo de uso de funciones de manipulación de arreglo de propósito
 general
 
 ```c
 #include <stdint.h>
 #include "serie.h"
 
-typedef struct Arreglo{
-    void *base;
-    int32_t tamanoElemento;
-    int32_t numElementos;
-}Arreglo;
+#include "arreglo.h"
 
-// Inicializa un descriptor que describe un arreglo con una direccion de memoria
-// base, tamaño de elemento y número de elementos dado
+/* Prototipos en arreglo.h
 void Arreglo_init(Arreglo *descriptor, void *base,
                   int tamanoElemento, int numElementos);
-// Retorna un puntero al elemento en la posición dada por el índice en base a 0
-// (0 es el primer elemento). El indice debe ser menor que numElementos
-// si no hay un elemento con el indice indicado retorna un puntero nulo (NULL, 
-// dirección 0)
+
 void *Arreglo_apunta(Arreglo *descriptor, int indice);
-// El puntero destino apunta a una región de memoria con al menos tamanoElemento
-// bytes disponibles que será rescrita con el valor del elemento.
-// Retorna 0 si la lectura fue exitosa, -1 si no existe el elemento con el 
-// índice dado
+
 int Arreglo_lee(const Arreglo *descriptor, int indice, void *destino);
-// El puntero origen apunta a una región de memoria que contiene un dato de
-// tamaño correcto para el arreglo. Sobreescribe el dato del arreglo en la
-// posición dada por el índice con el valor apuntado por origen.
-// Retorna 0 si la escritura fue exitosa, -1 si no existe el elemento con el
-// índice dado
+
 int Arreglo_escribe(Arreglo *descriptor, int indice, const void *origen);
+
+int Arreglo_intercambia(Arreglo *descriptor, int indice_1, int indice_2);
+
+*/
+
 
 static char nombres[20][4]={"Valeria","Alejandro","Hernan","Florencia"};
 static char auxiliar[20];
 
-void listado_4(void){
+void listado_3(void){
     Arreglo descriptor;
     Arreglo_init(&descriptor,nombres,20,4);
     const char *p1;
-    Serie_init(9600);
     Arreglo_lee(&descriptor,3,auxiliar);
     Serie_enviaCadena(auxiliar); // envía "Florencia"
     Serie_enviaNuevaLinea();
@@ -222,6 +189,10 @@ void listado_4(void){
     Arreglo_escribe(&descriptor,1,"Victor");
     Arreglo_lee(&descriptor,1,auxiliar);
     Serie_enviaCadena(auxiliar); // envía "Victor"
+    Serie_enviaNuevaLinea();
+    Arreglo_intercambia(&descriptor,0,1);
+    Arreglo_lee(&descriptor,1,auxiliar);
+    Serie_enviaCadena(auxiliar); // envía "Valeria"
     Serie_enviaNuevaLinea();
 }
 ```
@@ -251,9 +222,10 @@ ingles LIFO, Last In First Out). Una pila implementa las operaciones *push* y
 *pop* quita el último dato ingresado de la pila y retorna su valor.
 En este problema implementaremos una pila de enteros de 32 bit. La información
 sobre la memoria reservada y el estado de la pila se mantendrán en un
-descriptor. El Listado 5 muestra un ejemplo de uso.
+descriptor. El Listado 4 muestra un ejemplo de uso. Ubica tu solución en
+`lib/pila/pila.S`
 
-Listado 5. Ejemplo de uso de pila de enteros de 32 bit.
+Listado 4. Ejemplo de uso de pila de enteros de 32 bit.
 
 ```c
 #include <stdint.h>
@@ -261,21 +233,15 @@ Listado 5. Ejemplo de uso de pila de enteros de 32 bit.
 #include <string.h>
 #include "serie.h"
 
-typedef struct Pila{
-    int32_t *base; // Primera posición de la memoria reservada
-    int32_t *limite; // Dirección siguiente a la última posición reservada
-    int32_t *puntero; // Dirección del último dato insertado con push
-}Pila;
+#include "pila.h"
 
-// Inicializa el descriptor de pila con la dirección base y el tamaño de la
-// memoria reservada (Inicialmente la pila estará vacía) 
+/* Prototipos en pila.h
 void Pila_init(Pila *descriptor, int32_t *memoria, size_t tamano);
-// Ingresa un valor en la pila, retorna 0 si tuvo éxito y -1 si la pila está
-// llena
+
 int Pila_push(Pila *descriptor, int32_t valor);
-// Toma un elemento de la pila, guardándolo en destino. Retorna 0 si tuvo
-// éxito y -1 si la pila estaba vacía
+
 int Pila_pop(Pila *descriptor, int32_t *destino);
+*/
 
 #define TAMANO_PILA 20
 static int32_t memoria[TAMANO_PILA];
@@ -289,7 +255,7 @@ static const char *const mensajes[]={
     "\nERROR: Desborde de pila\n"
 };
 static void msgError(TipoError err){
-    Serie_enviaCadena(mensajes[TipoError]);
+    Serie_enviaCadena(mensajes[err]);
 }
 
 static void ingresaNumero(Pila *pila,const char *cadena){
@@ -300,7 +266,7 @@ static void ingresaNumero(Pila *pila,const char *cadena){
     }
 }
 
-void listado_5(void){
+void listado_4(void){
     Pila pila;
     Pila_init(&pila,memoria,TAMANO_PILA);
     Serie_enviaCadena(
@@ -310,7 +276,7 @@ void listado_5(void){
         "- resta (a b -- a-b)\n"
         "* producto (a b -- a*b)\n"
         "/ cociente (a b -- a/b)\n"
-        ". quita de pila y muestra el resultado último resultado (r -- )\n"
+        ". quita de pila y muestra el último resultado (r -- )\n"
         "bye finaliza el programa\n");
     int continuar = 1;
     while(continuar){
@@ -386,42 +352,32 @@ enteros de 32 bit que soporte las siguientes operaciones:
 - *pone*: Pone un nuevo elemento en la cola
 - *quita*: Quita el elemento más antiguo de la cola, retornando su valor
 
-El Listado 6 muestra un ejemplo de uso de la cola.
+El Listado 5 muestra un ejemplo de uso de la cola. Ubica tu solución en
+`lib/cola/cola.S`
 
-Listado 6. Ejemplo de uso de cola de enteros de 32 bit.
+Listado 5. Ejemplo de uso de cola de enteros de 32 bit.
 
 ```c
 #include <stdint.h>
 #include <stdbool.h>
 #include "serie.h"
 
-typedef struct Cola {
-    int32_t *base; // Primera posición de la memoria reservada
-    int32_t *limite; // Posición siguiente a la última posición reservada
-    int32_t *pEscritura; // Posición donde se va a escribir el proximo dato
-    int32_t *pLectura; // Posición del dato más antiguo no leído
-    bool llena; // 1 si la cola está llena, 0 en otro caso
-    // NOTA: el tipo bool se implementa como entero de 8 bit pero solo puede
-    // contener valores 0 y 1
-}Cola;
+#include "cola.h"
 
-// Inicializa el descriptor de cola con una cola vacía. La cola está vacía
-// si pEscritura es igual a pLectura y llena es 0
+/* Prototipos en cola.h
 void Cola_init(Cola *descriptor, int32_t *memoria,int tamano);
-// Pone un nuevo valor en cola. Retorna 0 si tuvo exito o -1 si la cola está
-// llena
+
 int Cola_pone(Cola *descriptor, int32_t valor);
-// Quita el elemento más antiguo de la cola y escribe su valor en destino.
-// Retorna 0 si tuvo exito o -1 si la cola está vacía
+
 int Cola_quita(Cola *descriptor, int32_t *destino);
+*/
 
 #define TAMANO_COLA 20
 static int32_t memoria[TAMANO_COLA];
 
-void listado_6(void){
+void listado_5(void){
     Cola cola;
     Cola_init(&cola,memoria,TAMANO_COLA);
-    Serie_init(9600);
 
     Cola_pone(&cola,1);
     Cola_pone(&cola,2);
