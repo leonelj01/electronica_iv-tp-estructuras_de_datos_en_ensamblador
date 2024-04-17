@@ -285,32 +285,32 @@ void listado_4(void){
         if (tamano == 1){
             switch(buffer[0]){
             case '+':
-                err = Pila_pop(&pila,&A);
-                err |= Pila_pop(&pila,&B);
+                err = Pila_pop(&pila,&B);
+                err |= Pila_pop(&pila,&A);
                 if (err){
                     msgError(MSG_INSUFICIENTE);
                 }else{
                     Pila_push(&pila,A+B);
                 }
             break; case '-':
-                err = Pila_pop(&pila,&A);
-                err |= Pila_pop(&pila,&B);
+                err = Pila_pop(&pila,&B);
+                err |= Pila_pop(&pila,&A);
                 if (err){
                     msgError(MSG_INSUFICIENTE);
                 }else{
                     Pila_push(&pila,A-B);
                 }
             break; case '*':
-                err = Pila_pop(&pila,&A);
-                err |= Pila_pop(&pila,&B);
+                err = Pila_pop(&pila,&B);
+                err |= Pila_pop(&pila,&A);
                 if (err){
                     msgError(MSG_INSUFICIENTE);
                 }else{
                     Pila_push(&pila,A*B);
                 }
             break; case '/':
-                err = Pila_pop(&pila,&A);
-                err |= Pila_pop(&pila,&B);
+                err = Pila_pop(&pila,&B);
+                err |= Pila_pop(&pila,&A);
                 if (err){
                     msgError(MSG_INSUFICIENTE);
                 }else{
