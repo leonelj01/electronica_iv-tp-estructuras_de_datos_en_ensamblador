@@ -26,8 +26,7 @@ void Pila_init(Pila *descriptor, int32_t *base, size_t capacidad);
  * @return int 0 si la operación se realizó, -1 si la pila estaba llena
  */
 int Pila_push(Pila *descriptor, int32_t valor);
-// Toma un elemento de la pila, guardándolo en destino. Retorna 0 si tuvo
-// éxito y -1 si la pila estaba vacía
+
 /**
  * @brief Quita el último elemento de la pila descrita y copia su valor en
  * destino

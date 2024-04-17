@@ -80,4 +80,4 @@ endfun Arreglo_escribe
 defun Arreglo_intercambia
     mov r0,#-1
     bx lr
-endfun
+endfun Arreglo_intercambia
