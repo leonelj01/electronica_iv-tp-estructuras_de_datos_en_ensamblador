@@ -22,8 +22,8 @@ static char buffer[TAMANO_BUFFER];
 
 typedef enum {MSG_INSUFICIENTE,MSG_DESBORDE} TipoError;
 static const char *const mensajes[]={
-    "\nERROR: Datos insuficietes en pila!\n",
-    "\nERROR: Desborde de pila\n"
+    "\r\nERROR: Datos insuficietes en pila!\r\n",
+    "\r\nERROR: Desborde de pila\r\n"
 };
 static void msgError(TipoError err){
     Serie_enviaCadena(mensajes[err]);
@@ -42,13 +42,13 @@ void listado_4(void){
     Pila_init(&pila,memoria,TAMANO_PILA);
     Serie_enviaCadena(
         "Calculadora RPN. Ingrese números enteros y operadores"
-        "separados por espacio en blanco o nueva línea.Operadores soportados:\n"
-        "+ suma (a b -- a+b)\n"
-        "- resta (a b -- a-b)\n"
-        "* producto (a b -- a*b)\n"
-        "/ cociente (a b -- a/b)\n"
-        ". quita de pila y muestra el último resultado (r -- )\n"
-        "bye finaliza el programa\n");
+        "separados por espacio en blanco o nueva línea.Operadores soportados:\r\n"
+        "+ suma (a b -- a+b)\r\n"
+        "- resta (a b -- a-b)\r\n"
+        "* producto (a b -- a*b)\r\n"
+        "/ cociente (a b -- a/b)\r\n"
+        ". quita de pila y muestra el último resultado (r -- )\r\n"
+        "bye finaliza el programa\r\n");
     int continuar = 1;
     while(continuar){
         int32_t A,B,err;
