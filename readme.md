@@ -2,7 +2,7 @@
 
 Este trabajo práctico debe realizarse en modalidad *individual*.
 
-*Plazo*: **1 Semana**.
+*Plazo*: **2 Semanas**.
 
 ## Objetivos
 
