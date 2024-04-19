@@ -1,6 +1,6 @@
-# Memoria técnica - Ejercicios de programación
+# Memoria técnica - Estructuras de datos en ensamblador de un procesador ARMv7M
 
-Electrónica IV - TP - Programación en Ensamblador de un Procesador ARMv7-M
+Electrónica IV - TP - Estructuras de datos en ensamblador de un procesador ARMv7M
 
 > Aquí tu nombre completo
 
