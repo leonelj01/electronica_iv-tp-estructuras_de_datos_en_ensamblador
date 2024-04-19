@@ -1,4 +1,4 @@
-# Electrónica IV - TP - Programación en ensamblador de un procesador ARMv7M
+# Electrónica IV - TP - Estructuras de datos en ensamblador de un procesador ARMv7M
 
 Este trabajo práctico debe realizarse en modalidad *individual*.
 
