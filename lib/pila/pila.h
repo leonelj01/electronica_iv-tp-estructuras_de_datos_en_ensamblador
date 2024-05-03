@@ -5,7 +5,7 @@
 
 typedef struct Pila{
     int32_t *base; // Primera posición de la memoria reservada
-    int32_t *limite; // Dirección siguiente a la última posición reservada
+    int32_t *limite; // Dirección de la primera posición libre (donde se escribe el próximo dato)
     int32_t *puntero; // Dirección del último dato insertado con push
 }Pila;
 
