@@ -1,97 +1,118 @@
 #include <unity.h>
 #include "arreglo.h"
 
-enum{TAMANO_ELEMENTO = 20,NUM_ELEMENTOS=4};
-
-static struct Datos{
-    char nombres[NUM_ELEMENTOS][TAMANO_ELEMENTO];
-    char auxiliar[TAMANO_ELEMENTO];
-    Arreglo descriptor;
-}datos;
-
-#define S0 "Valeria"
-#define S1 "Alejandro"
-#define S2 "Hernan"
-#define S3 "Florencia"
-#define Sx "Monica"
-void setUp(void){
-    datos = (struct Datos){
-        .nombres={S0,S1,S2,S3},
-        .auxiliar={},
-        .descriptor={}
-    };
-    Arreglo_init(
-        &datos.descriptor,&datos.nombres,TAMANO_ELEMENTO,NUM_ELEMENTOS);
-}
+void setUp(void){}
 void tearDown(void){}
 
 static void test_lee(void){
-    Arreglo *const descriptor = &datos.descriptor;
-    char *const aux = datos.auxiliar;
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,0,aux));
-    TEST_ASSERT_EQUAL_STRING(S0,aux);
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,3,aux));
-    TEST_ASSERT_EQUAL_STRING(S3,aux);
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,1,aux));
-    TEST_ASSERT_EQUAL_STRING(S1,aux);
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,2,aux));
-    TEST_ASSERT_EQUAL_STRING(S2,aux);
+    enum{TELEM=10,NELEM=3};
+    char nombres[NELEM][TELEM]={"Emilia","Armando","Griselda"};
+    char aux[TELEM]={};
+    Arreglo d[1];
+    int r;
+    Arreglo_init(d,nombres,TELEM,NELEM);
+    r = Arreglo_lee(d,-1,aux);
+    TEST_ASSERT_EQUAL(-1,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){},aux,TELEM);
+    r = Arreglo_lee(d,NELEM,aux);
+    TEST_ASSERT_EQUAL(-1,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){},aux,TELEM);
+    r = Arreglo_lee(d,0,aux);
+    TEST_ASSERT_EQUAL(0,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char [TELEM]){"Emilia"},aux,TELEM);
+    Arreglo_init(d,nombres,TELEM,NELEM);
+    r = Arreglo_lee(d,1,aux);
+    TEST_ASSERT_EQUAL(0,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char [TELEM]){"Armando"},aux,TELEM);
+
+    r = Arreglo_lee(d,2,aux);
+    TEST_ASSERT_EQUAL(0,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char [TELEM]){"Griselda"},aux,TELEM);
+
 }
 
 static void test_escribe(void){
-    Arreglo *const descriptor = &datos.descriptor;
-    char *const aux = datos.auxiliar;
-    TEST_ASSERT_FALSE(Arreglo_escribe(descriptor,0,Sx));
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,0,aux));
-    TEST_ASSERT_EQUAL_STRING(Sx,aux);
-    TEST_ASSERT_FALSE(Arreglo_escribe(descriptor,1,S3));
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,1,aux));
-    TEST_ASSERT_EQUAL_STRING(S3,aux);
-    TEST_ASSERT_FALSE(Arreglo_escribe(descriptor,2,S1));
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,2,aux));
-    TEST_ASSERT_EQUAL_STRING(S1,aux);
-    TEST_ASSERT_FALSE(Arreglo_escribe(descriptor,3,S0));
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,3,aux));
-    TEST_ASSERT_EQUAL_STRING(S0,aux);
+    enum{TELEM=10,NELEM=3};
+    struct Datos{
+        char guarda1[TELEM];
+        char nombres[NELEM][TELEM];
+        char guarda2[TELEM];
+    }datos = {};
+    Arreglo d[1];
+    int r;
+
+    Arreglo_init(d,datos.nombres,TELEM,NELEM);
+    
+    r=Arreglo_escribe(d,-1,(char [TELEM]){"Gaston"});
+    TEST_ASSERT_EQUAL(-1,r);
+    r=Arreglo_escribe(d,NELEM,(char [TELEM]){"Oscar"});
+    TEST_ASSERT_EQUAL(-1,r);
+    TEST_ASSERT_EQUAL_MEMORY(&(struct Datos){},&datos,sizeof datos);
+
+    r=Arreglo_escribe(d,0,(char[TELEM]){"Bridgitte"});
+    TEST_ASSERT_EQUAL(0,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Bridgitte"},datos.nombres[0],TELEM);
+
+    r=Arreglo_escribe(d,2,(char[TELEM]){"Sebastian"});
+    TEST_ASSERT_EQUAL(0,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Sebastian"},datos.nombres[2],TELEM);
+
+    r=Arreglo_escribe(d,1,(char[TELEM]){"Orfelia"});
+    TEST_ASSERT_EQUAL(0,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Orfelia"},datos.nombres[1],TELEM);
 }
 
 static void test_apunta(void){
-    Arreglo *const descriptor = &datos.descriptor;
-    char *const aux = datos.auxiliar;
+    enum {TELEM=7,NELEM=4};
+    char datos[NELEM][TELEM]={};
+    Arreglo d[1];
+    char *p;
 
-    char *const p0 = Arreglo_apunta(descriptor,0);
-    char *const p3 = Arreglo_apunta(descriptor,3);
+    Arreglo_init(d,datos,TELEM,NELEM);
 
-    TEST_ASSERT_NOT_NULL(p0);
-    TEST_ASSERT_NOT_NULL(p3);
+    p = Arreglo_apunta(d,-1);
+    TEST_ASSERT_NULL(p);
 
-    TEST_ASSERT_EQUAL_STRING(S0,p0);
-    TEST_ASSERT_EQUAL_STRING(S3,p3);
+    p = Arreglo_apunta(d,2);
+    TEST_ASSERT_EQUAL_PTR(datos[2],p);
 
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,1,p0));
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,0,aux));
-    TEST_ASSERT_EQUAL_STRING(S1,aux);
+    p = Arreglo_apunta(d,0);
+    TEST_ASSERT_EQUAL_PTR(datos[0],p);
+    
+    p = Arreglo_apunta(d,3);
+    TEST_ASSERT_EQUAL_PTR(datos[3],p);
 
-    TEST_ASSERT_FALSE(Arreglo_escribe(descriptor,3,Sx));
-    TEST_ASSERT_EQUAL_STRING(Sx,p3);
+    p = Arreglo_apunta(d,1);
+    TEST_ASSERT_EQUAL_PTR(datos[1],p);
+
+    p = Arreglo_apunta(d,4);
+    TEST_ASSERT_NULL(p);
 }
 
 static void test_intercambia(void){
-    Arreglo *const descriptor = &datos.descriptor;
-    char *const aux = datos.auxiliar;
+    enum{TELEM=10,NELEM=3};
+    char datos[NELEM][TELEM]={"Daryl","Janette","Josefina"};
+    Arreglo d[1];
+    int r;
+    Arreglo_init(d,datos,TELEM,NELEM);
+    r=Arreglo_intercambia(d,-1,1);
+    TEST_ASSERT_EQUAL(-1,r);
+    r=Arreglo_intercambia(d,0,3);
+    TEST_ASSERT_EQUAL(-1,r);
+    r=Arreglo_intercambia(d,3,-1);
+    TEST_ASSERT_EQUAL(-1,r);
 
-    TEST_ASSERT_FALSE(Arreglo_intercambia(descriptor,0,3));
-    TEST_ASSERT_FALSE(Arreglo_intercambia(descriptor,1,2));
+    r=Arreglo_intercambia(d,0,1);
+    TEST_ASSERT_EQUAL(0,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Janette"},datos[0],TELEM);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Daryl"},datos[1],TELEM);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Josefina"},datos[2],TELEM);
 
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,0,aux));
-    TEST_ASSERT_EQUAL_STRING(S3,aux);
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,1,aux));
-    TEST_ASSERT_EQUAL_STRING(S2,aux);
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,2,aux));
-    TEST_ASSERT_EQUAL_STRING(S1,aux);
-    TEST_ASSERT_FALSE(Arreglo_lee(descriptor,3,aux));
-    TEST_ASSERT_EQUAL_STRING(S0,aux);
-
+    r=Arreglo_intercambia(d,2,0);
+    TEST_ASSERT_EQUAL(0,r);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Josefina"},datos[0],TELEM);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Daryl"},datos[1],TELEM);
+    TEST_ASSERT_EQUAL_CHAR_ARRAY((char[TELEM]){"Janette"},datos[2],TELEM);
 }
 int main(void){
     UNITY_BEGIN();
