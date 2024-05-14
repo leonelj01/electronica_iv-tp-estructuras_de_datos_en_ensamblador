@@ -19,6 +19,32 @@
     .type comparaMemoria, %function
     .global comparaMemoria
 comparaMemoria:
-    mov r0,#0
-    bx lr
+        /*
+        * r0 -> Izquierda
+        * r1 -> Derecha
+        * r2 -> Tamaño
+        */
+compara:
+        ldrb    r3, [r0], #1
+        ldrb    r4, [r1], #1
+
+        cmp     r3, r4
+        blo     izquierda
+        bhi     derecha
+        subs    r2, #1
+        bne     compara
+
+        mov     r0, #0
+        b       fin
+
+izquierda:
+        mov     r0, #-1
+        b       fin
+
+derecha:
+        mov     r0, #1
+        b       fin
+
+fin:
+        bx      lr
     .size comparaMemoria, . - comparaMemoria

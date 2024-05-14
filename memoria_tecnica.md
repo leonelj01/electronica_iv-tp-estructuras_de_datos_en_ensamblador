@@ -2,7 +2,7 @@
 
 Electrónica IV - TP - Estructuras de datos en ensamblador de un procesador ARMv7M
 
-> Aquí tu nombre completo
+### ***Juarez, Gustavo Leonel***
 
 ## Objetivos
 
