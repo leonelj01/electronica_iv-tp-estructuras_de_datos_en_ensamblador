@@ -18,33 +18,32 @@
     .type mueveMemoria, %function
     .global mueveMemoria
 mueveMemoria:
-    // r0 -> Origen
-    // r1 -> Destino
+    // r0 -> Destino 
+    // r1 -> Origen
     // r2 -> Longitud de la palabra
 
-    cmp     r0, r1                 // Compara los punteros de origen y destino
-    beq     fin
-    blo     copia_desde_inicio
-    bhi     copia_desde_final
+    cmp     r0, r1                      // Compara los punteros de origen y destino
+    beq     fin                         // Si ambos son iguales salta a "fin"
+    blo     copia_desde_inicio          // Si r0 es menor que r1 entonces copio de izquierda a derecha
+    bhi     copia_desde_final           // Si r0 es mayor que r1 entonces copio de derecha a izquierda
 
 copia_desde_inicio:
-    ldrb    r3, [r1], #1          // Carga el byte desde el origen y actualiza el puntero
-    strb    r3, [r0], #1          // Almacena el byte en el destino y actualiza el puntero
-    subs    r2, #1                // Decrementa la longitud
+    ldrb    r3, [r1], #1                // Carga el byte desde el origen y actualiza el puntero
+    strb    r3, [r0], #1                // Almacena el byte en el destino y actualiza el puntero
+    subs    r2, #1                      // Decrementa la longitud
     bne     copia_desde_inicio
     b       fin
 
 copia_desde_final:
-    add     r4, r1, r2             // Ajusta los punteros al final de las regiones
-    add     r5, r0, r2
+    add     r1, r2                      // Ajusta los punteros al final de las regiones
+    add     r0, r2
 
 copia_desde_final_loop:
-    ldrb    r3, [r4, #-1]!         // Carga el byte desde el origen y actualiza el puntero
-    strb    r3, [r5, #-1]!        // Almacena el byte en el destino y actualiza el puntero
-    subs    r2, #1                // Decrementa la longitud
+    ldrb    r3, [r1, #-1]!              // Carga el byte desde el origen y actualiza el puntero
+    strb    r3, [r0, #-1]!              // Almacena el byte en el destino y actualiza el puntero
+    subs    r2, #1                      // Decrementa la longitud
     bne     copia_desde_final_loop
 
 fin:
     bx lr
     .size mueveMemoria, . - mueveMemoria
-

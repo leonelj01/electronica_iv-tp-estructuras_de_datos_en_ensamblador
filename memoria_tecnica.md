@@ -18,28 +18,216 @@ Electrónica IV - TP - Estructuras de datos en ensamblador de un procesador ARMv
 > *Sugiero conservar estas instrucciones durante el desarrollo, posiblemente
 > en forma impresa, para poder referirte a ellas como guía mientras trabajas*
 >
-> ## Nombre del ejercicio
->
-> Explica el objetivo del programa, sus entradas y salidas esperadas. Da
-> ejemplos ilustrativos
->
-> ***IMPORTANTE***: El proceso de diseño es *iterativo*, por lo tanto los
-> sub-capítulos siguientes no se escribirán en orden sino que, tras una primera
-> versión irán siendo actualizados conforme avance tu conocimiento del problema
-> y tome forma tu solción. *Cada vez que encuentras una dificultad añade una
-> nota en el sub-capítulo correspondiente*.
->
-> ### Análisis del problema
->
-> Desarrolla aquí tu análisis del problema, puedes por ejemplo, resolver
-> "a mano" de casos particulares ilustrativos para entender mejor como trabajar.
-> En esta sección vas desarrollando un algoritmo para resolver el problema.
->
-> ### Solución
->
-> Presenta aquí la versión final del algoritmo junto con su implementación en
-> ensamblador.
->
+
+## Mueve memoria
+
+Hay dos regiones contiguas de memoria, posiblemente solapadas, de igual cantidad
+de bytes. Estas regiones las llamaremos *origen* y *destino*. Debes copiar los
+valores de *origen* en *destino*. Si las regiones se solapan, *destino* debe
+tener al terminar una copia íntegra de los datos (en ese caso *origen* ya no
+la tendrá, por eso es mover y no copiar). Tu solución será en la forma de la
+función `mueveMemoria` cuyo uso se ejemplifica en el Listado 1. Ubica tu
+solución en `lib/ops_memoria/mueve.S`.
+
+Listado 1: Prototipo de la funcion `mueveMemoria`  
+
+```c
+#include "serie.h"
+
+#include "ops_memoria.h"
+
+/* En ops_memoria.h
+void mueveMemoria(void *destino,const void *origen, size_t tamano);
+*/ 
+
+static char origen[] = "Hola Mundo12345";
+
+void listado_1(void){
+    const size_t tamano = 4+1+5; // Cantidad de caracteres en "Hola Mundo"
+    mueveMemoria(origen+5,origen,tamano);
+    Serie_enviaCadena(origen); // Transmite "Hola Hola Mundo"
+    Serie_enviaNuevaLinea();
+    mueveMemoria(origen,origen+5,tamano);
+    Serie_enviaCadena(origen); // Transmite "Hola MundoMundo"
+    Serie_enviaNuevaLinea();
+}
+```
+
+### Análisis del problema
+
+Para resolver el problema, primero hay que determinar como copiar los datos de origen en destino pues dependiendo de donde
+se encuentre este se copiará desde izquierda a derecha o al reves, esto determina como se recorreran. Por ello si destino 
+se encuentra antes que origen se debe copiar los datos de izquierda a derecha. En caso de que destino este ubicado despues
+de origen entonces debo copiar los datos de derecha a izquierda.
+![](figuras/fig-1.png)
+
+Entonces para comenzar determinamos de que forma se copiaran los datos, si de izquierda a derecha o al reves. Para ello se 
+utiliza el siguiente codigo:
+
+```asm
+    cmp     r0, r1                      // Compara los punteros de origen y destino
+    beq     fin                         // Si ambos son iguales salta a "fin"
+    blo     copia_desde_inicio          // Si r0 es menor que r1 entonces copio de izquierda a derecha
+    bhi     copia_desde_final           // Si r0 es mayor que r1 entonces copio de derecha a izquierda
+```
+
+Donde las etiqueta de `copia_desde_inicio` y `copia_desde_final` representan saltos que determinarán como se realizaran las
+diferentes forma de escritura.
+
+Para poder copiar desde izquierda a derecha se recorre el registro, en este caso será r3, en dicha direccion. Para lograr
+esto se suma un byte cada vez que se produce un salto a `copia_desde_inicio`:
+
+```asm
+copia_desde_inicio:
+    ldrb    r3, [r1], #1                // Carga el byte desde el origen y actualiza el puntero
+    strb    r3, [r0], #1                // Almacena el byte en el destino y actualiza el puntero
+    subs    r2, #1                      // Decrementa la longitud
+    bne     copia_desde_inicio
+    b       fin
+```
+
+En cambio para poder copiar desde derecha a izquierda primero nos debemos ubicar en la posicion desde la cual queremos copiar,
+esta estará dada por el tamaño de la palabra, entonces primero debemos ubicarnos al final de la palabra que queremos copiar
+esto se realiza en `copia_desde_final`. Luego  debemos disminuir el tamaño en un byte cada vez que se produce un salto a 
+`copia_desde_final_loop`:
+
+```asm
+copia_desde_final:
+    add     r1, r2                      // Ajusta los punteros al final de las regiones
+    add     r0, r2
+
+copia_desde_final_loop:
+    ldrb    r3, [r1, #-1]!              // Carga el byte desde el origen y actualiza el puntero
+    strb    r3, [r0, #-1]!              // Almacena el byte en el destino y actualiza el puntero
+    subs    r2, #1                      // Decrementa la longitud
+    bne     copia_desde_final_loop
+```
+### Solucion
+``` asm
+mueveMemoria:
+    // r0 -> Destino 
+    // r1 -> Origen
+    // r2 -> Longitud de la palabra
+
+    cmp     r0, r1                      // Compara los punteros de origen y destino
+    beq     fin                         // Si ambos son iguales salta a "fin"
+    blo     copia_desde_inicio          // Si r0 es menor que r1 entonces copio de izquierda a derecha
+    bhi     copia_desde_final           // Si r0 es mayor que r1 entonces copio de derecha a izquierda
+
+copia_desde_inicio:
+    ldrb    r3, [r1], #1                // Carga el byte desde el origen y actualiza el puntero
+    strb    r3, [r0], #1                // Almacena el byte en el destino y actualiza el puntero
+    subs    r2, #1                      // Decrementa la longitud
+    bne     copia_desde_inicio
+    b       fin
+
+copia_desde_final:
+    add     r1, r2                      // Ajusta los punteros al final de las regiones
+    add     r0, r2
+
+copia_desde_final_loop:
+    ldrb    r3, [r1, #-1]!              // Carga el byte desde el origen y actualiza el puntero
+    strb    r3, [r0, #-1]!              // Almacena el byte en el destino y actualiza el puntero
+    subs    r2, #1                      // Decrementa la longitud
+    bne     copia_desde_final_loop
+
+fin:
+    bx lr
+```
+## Compara memoria
+
+Dadas dos regiones de memoria de igual tamaño, que llamaremos *izquierda* y
+*derecha*, compara sus contenidos byte a byte como valores *sin signo* y retorna
+un valor entero. El valor retornado será $0$ si los contenidos de las regiones
+son *iguales*, $-1$ si el primer byte distinto es *menor* en *izquierda* que en
+*derecha* y $1$ si el primer byte distinto es *mayor* en *izquierda* que en
+*derecha*. Tu solución será en la forma de la función `comparaMemoria` cuyo uso
+se ejemplifica en el Listado 2. Ubica tu solución en `lib/ops_memoria/compara.S`
+
+Listado 2:
+
+```c
+#include <stdint.h>
+#include "serie.h"
+
+#include "ops_memoria.h"
+
+/* Prototipo en ops_memoria.h
+int comparaMemoria(const void *izquierda,const void *derecha, size_t tamano);
+*/
+
+uint8_t a1[]={0,1,2,3};
+uint8_t a2[]={0,1,3,5};
+uint8_t a3[]={0,1,2,3};
+size_t tamano = 4;
+
+void listado_2(void){
+    const int comp1 = comparaMemoria(a1,a3,tamano);
+    const int comp2 = comparaMemoria(a1,a2,tamano);
+    const int comp3 = comparaMemoria(a2,a3,tamano);
+    Serie_enviaEntero(comp1); // envia "0"
+    Serie_enviaNuevaLinea();
+    Serie_enviaEntero(comp2); // envia "-1"
+    Serie_enviaNuevaLinea();
+    Serie_enviaEntero(comp3); // envia "1"
+    Serie_enviaNuevaLinea();
+}
+```
+
+### Análisis del problema
+Para lograr resolver el ejercicio se debe tener en cuenta que la comparacion de las regiones de memoria se realiza byte a byte,
+es decir, voy comparando los byte mientras recorro los registros `Izquierda` y `derecha`. Luego la funcion deberá retornar un
+valor segun lo siguiente:
+* Si *`Izquierda`* es igual que *`derecha`* se retornará *0*
+* Si *`Izquierda`* es menor que *`derecha`* se retornará *-1*
+* Si *`Izquierda`* es mayor que *`derecha`* se retornará *1*
+![](figuras/fig-2.png)
+
+### Solucion
+
+```asm
+comparaMemoria:
+        /*
+        * r0 -> Izquierda
+        * r1 -> Derecha
+        * r2 -> Tamaño
+        */
+compara:
+        ldrb    r3,  [r0], #1           // Cargo el byte desde Izquierda y actualizo el puntero.
+        ldrb    r12, [r1], #1           // Cargo el byte desde Derecha y actualizo el puntero.
+
+        cmp     r3, r12                 // Comparo los punteros de Izquierda y Derecha.
+        blo     izquierda               // Si Izquierda es menor que derecha entonces salta a la etiqueta.
+        bhi     derecha                 // Si Izquierda es mayor que derecha entonces salta a la etiqueta.
+        subs    r2, #1                  // Decremento la longitud de la palabra
+        bne     compara                 // Mientras r2 sea distinto de cero salto a compara y continuo el loop
+
+        mov     r0, #0                  // Retorna 0
+        b       fin
+
+izquierda:
+        mov     r0, #-1                 // Retorna -1
+        b       fin
+
+derecha:
+        mov     r0, #1                  // Retorna 1
+
+fin:
+        bx      lr
+```
+
+## Arreglo
+### Análisis del problema
+### Solucion
+
+## Pila
+### Análisis del problema
+### Solucion
+
+## Cola
+### Análisis del problema
+### Solucion
+
 > ### Notas
 >
 > Incluye aquí notas describiendo tu experiencia en la solución del ejercicio.

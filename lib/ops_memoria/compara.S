@@ -25,25 +25,24 @@ comparaMemoria:
         * r2 -> Tamaño
         */
 compara:
-        ldrb    r3, [r0], #1
-        ldrb    r4, [r1], #1
+        ldrb    r3,  [r0], #1           // Cargo el byte desde Izquierda y actualizo el puntero.
+        ldrb    r12, [r1], #1           // Cargo el byte desde Derecha y actualizo el puntero.
 
-        cmp     r3, r4
-        blo     izquierda
-        bhi     derecha
-        subs    r2, #1
-        bne     compara
+        cmp     r3, r12                 // Comparo los punteros de Izquierda y Derecha.
+        blo     izquierda               // Si Izquierda es menor que derecha entonces salta a la etiqueta.
+        bhi     derecha                 // Si Izquierda es mayor que derecha entonces salta a la etiqueta.
+        subs    r2, #1                  // Decremento la longitud de la palabra
+        bne     compara                 // Mientras r2 sea distinto de cero salto a compara y continuo el loop
 
-        mov     r0, #0
+        mov     r0, #0                  // Retorna 0
         b       fin
 
 izquierda:
-        mov     r0, #-1
+        mov     r0, #-1                 // Retorna -1
         b       fin
 
 derecha:
-        mov     r0, #1
-        b       fin
+        mov     r0, #1                  // Retorna 1
 
 fin:
         bx      lr
