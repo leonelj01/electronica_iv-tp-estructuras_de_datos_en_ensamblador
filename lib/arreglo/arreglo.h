@@ -61,7 +61,7 @@ int Arreglo_escribe(Arreglo *descriptor, int indice, const void *origen);
  * @param descriptor Descriptor de arreglo
  * @param indice_1 Primer índice
  * @param indice_2 Segundo índice
- * @return int 0 si tuvo exito, 1 si algún elemento no existe
+ * @return int 0 si tuvo exito, -1 si algún elemento no existe
  */
 int Arreglo_intercambia(Arreglo *descriptor, int indice_1, int indice_2);
 

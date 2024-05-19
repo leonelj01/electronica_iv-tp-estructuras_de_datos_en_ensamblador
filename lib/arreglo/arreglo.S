@@ -75,7 +75,7 @@ endfun Arreglo_escribe
  * @param descriptor Descriptor de arreglo
  * @param indice_1 Primer índice
  * @param indice_2 Segundo índice
- * @return int 0 si tuvo exito, 1 si algún elemento no existe
+ * @return int 0 si tuvo exito, -1 si algún elemento no existe
  */
 defun Arreglo_intercambia
     mov r0,#-1
