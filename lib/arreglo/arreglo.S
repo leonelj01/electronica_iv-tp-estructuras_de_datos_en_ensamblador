@@ -14,6 +14,11 @@
     .size \nombre, . - \nombre
 .endm
 
+// Defino una estructura para el descriptor
+.equ Arreglo_base,0
+.equ Arreglo_tamElemento,4
+.equ Arreglo_numElemento,8
+
 /**
  * @brief Inicializa un descriptor que describe un arreglo con una direccion de
  * memoria base, tamaño de elemento y número de elementos dados
@@ -24,6 +29,9 @@
  * @param numElementos Número de elementos
  */
 defun Arreglo_init
+    str r1, [r0,#Arreglo_base]
+    str r2, [r0,#Arreglo_tamElemento]
+    str r3, [r0,#Arreglo_numElemento]
     bx lr
 endfun Arreglo_init
 
@@ -36,8 +44,21 @@ endfun Arreglo_init
  * elemento (NULL es la dirección 0)
  */
 defun Arreglo_apunta
-    mov r0,#0
+    // r0: descriptor, r1:indice
+    ldr r2, [r0,#Arreglo_numElemento]
+    cmp r1, r2       // comparo el numero de elementos con el indice ingresado 
+    bhs error         // si se ingreso un numero que es mayor a la cantidad de elementos devuelve un cero (error)
+    ldr r2, [r0,#Arreglo_tamElemento]   // cargo en r2 el tamaño del elemento
+    ldr r0, [r0,#Arreglo_base]          // en r0 cargo la base
+    // para obtener la direccion del elemento hago la siguiente operacion dir = base * indice + 1
+    mla r0, r2, r1, r0               //revisar en la guia de ARM como funciona la instruccion  
+
+fin:
     bx lr
+
+error:
+    mov r0,#0
+    b   fin
 endfun Arreglo_apunta
 
 /**
@@ -51,8 +72,31 @@ endfun Arreglo_apunta
  * @return int 0 si la operación pudo realizarse, -1 si el elemento no existe
  */
 defun Arreglo_lee
-    mov r0,#-1
+    ldr r3,[r0,#Arreglo_numElemento]
+    cmp r1, r3
+    bhs error_2
+    ldr r3, [r0,#Arreglo_tamElemento]
+    ldr r0, [r0,#Arreglo_base]
+    mla r0,r3,r1,r0
+    add r3,r0
+
+lee:
+    cmp r0,r3
+    bhs correcto_2
+    ldrb r1,[r0],#1
+    strb r1,[r2],#1
+    b    lee
+
+correcto_2:
+    mov r0, #0
+
+fin_2:
     bx lr
+
+error_2:
+    mov r0,#-1
+    b   fin_2
+
 endfun Arreglo_lee
 
 /**
@@ -65,8 +109,30 @@ endfun Arreglo_lee
  * arreglo
  */
 defun Arreglo_escribe
-    mov r0,#-1
+    ldr r3,[r0,#Arreglo_numElemento]
+    cmp r1, r3
+    bhs error_3
+    ldr r3, [r0,#Arreglo_tamElemento]
+    ldr r0, [r0,#Arreglo_base]
+    mla r0,r3,r1,r0
+    add r3,r0
+
+escribe:
+    cmp r0,r3
+    bhs correcto_3
+    ldrb r1,[r2],#1
+    strb r1,[r0],#1
+    b    escribe
+
+correcto_3:
+    mov r0, #0
+
+fin_3:
     bx lr
+
+error_3:
+    mov r0,#-1
+    b   fin_3
 endfun Arreglo_escribe
 
 /**
@@ -78,6 +144,38 @@ endfun Arreglo_escribe
  * @return int 0 si tuvo exito, -1 si algún elemento no existe
  */
 defun Arreglo_intercambia
-    mov r0,#-1
-    bx lr
+    push {r4-r6,lr}
+    mov r4, r0
+    mov r5, r1
+    mov r6, r2
+    bl  Arreglo_apunta
+    mov r5, r0 // r5 -> p_i
+    mov r0, r4
+    mov r1, r6
+    bl  Arreglo_apunta
+    mov r6, r0 // r6 -> p_j
+    ldr r0, [r4,#Arreglo_tamElemento]
+    add r0, r5 // r0 -> p_if
+    cbz r5, 3f
+    cbz r6, 3f
+
+0:
+    cmp r5, r0
+    bhs 1f
+    ldrb r1, [r5]
+    ldrb r2, [r6]
+    strb r2, [r5], #1
+    strb r1, [r6], #1
+    b    0b
+
+1:
+    mov r0, #0
+
+2:
+    pop {r4-r6,pc}
+
+3:
+    mov r0, #-1
+    b   2b
+
 endfun Arreglo_intercambia

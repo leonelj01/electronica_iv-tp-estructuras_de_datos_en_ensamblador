@@ -102,7 +102,7 @@ copia_desde_final_loop:
     subs    r2, #1                      // Decrementa la longitud
     bne     copia_desde_final_loop
 ```
-### Solucion
+### Solución
 ``` asm
 mueveMemoria:
     // r0 -> Destino 
@@ -183,7 +183,7 @@ valor segun lo siguiente:
 * Si *`Izquierda`* es mayor que *`derecha`* se retornará *1*
 ![](figuras/fig-2.png)
 
-### Solucion
+### Solución
 
 ```asm
 comparaMemoria:
@@ -217,16 +217,106 @@ fin:
 ```
 
 ## Arreglo
+En este problema nos ocuparemos de representar un arreglo mediante un tipo de
+datos estructurado o registro (struct de lenguaje C) que contiene la información
+necesaria para operar sobre el mismo. El elemento que describe al arreglo se
+llamará *descriptor*. Definiremos funciones que implementan una interfaz
+uniforme de acceso al arreglo en base a un descriptor. Dicha interfaz contiene
+las siguientes operaciones:
+
+- Inicializar un descriptor de arreglo
+- Obtener un puntero a un elemento del arreglo
+- Leer un elemento del arreglo
+- Escribir un elemento del arreglo
+- Intercambiar los valores de dos elementos del arreglo
+
+```c
+typedef struct Arreglo{
+    void *base;
+    int32_t tamanoElemento;
+    int32_t numElementos;
+}Arreglo;
+
+/**
+ * @brief Inicializa un descriptor que describe un arreglo con una direccion de
+ * memoria base, tamaño de elemento y número de elementos dados
+ * 
+ * @param descriptor Puntero al descriptor a inicializar 
+ * @param base Dirección base del arreglo
+ * @param tamanoElemento Tamaño del elemento
+ * @param numElementos Número de elementos
+ */
+void Arreglo_init(Arreglo *descriptor, void *base,
+                  int tamanoElemento, int numElementos);
+
+/**
+ * @brief Retorna un puntero a un elemento del arreglo descrito
+ * 
+ * @param descriptor Descriptor de arreglo inicializado con Arreglo_init
+ * @param indice
+ * @return void* Puntero al elemento indicado por indice, NULL si no existe el
+ * elemento (NULL es la dirección 0)
+ */
+void *Arreglo_apunta(Arreglo *descriptor, int indice);
+
+/**
+ * @brief Lee el valor de un elemento del arreglo descrito, copiándolo en el
+ * espacio de memoria proporcionado. Supone que la región de memoria tiene
+ * tamaño suficiente
+ * 
+ * @param descriptor Descriptor del arreglo
+ * @param indice Índice del elemento a leer
+ * @param destino Puntero a la regió de memoria donde copiar el valor
+ * @return int 0 si la operación pudo realizarse, -1 si el elemento no existe
+ */
+int Arreglo_lee(const Arreglo *descriptor, int indice, void *destino);
+
+/**
+ * @brief Escribe el valor proporcionado en el arreglo descrito
+ * 
+ * @param descriptor Descriptor de arreglo
+ * @param indice Índice del elemento a escribir
+ * @param origen Puntero a región conteniendo los datos a escribir
+ * @return int 0 si efectuó la operación, -1 si no existe el elemento en el
+ * arreglo
+ */
+int Arreglo_escribe(Arreglo *descriptor, int indice, const void *origen);
+
+/**
+ * @brief Intercambia los valores de dos elementos del arreglo
+ * 
+ * @param descriptor Descriptor de arreglo
+ * @param indice_1 Primer índice
+ * @param indice_2 Segundo índice
+ * @return int 0 si tuvo exito, -1 si algún elemento no existe
+ */
+int Arreglo_intercambia(Arreglo *descriptor, int indice_1, int indice_2);
+```
+
 ### Análisis del problema
-### Solucion
+
+### 1. Arreglo_Init:
+
+Antes de comenzar a realizar las funciones debemos establecer el descriptor del arreglo, el cual definirá los parametros
+del mismo. Estos son:
+- Base: es la dirección a la que se encuentra el primer elemento.
+- Tamaño de elementos: es la cantidad maxima de elementos que puedo almacenar.
+- Numero de elementos: es la cantidad de elementos que se tiene.
+
+"figura hecha a mano INIT"
+
+### 2. apunta
+
+
+### Solución
 
 ## Pila
 ### Análisis del problema
-### Solucion
+### Solución
 
 ## Cola
 ### Análisis del problema
-### Solucion
+### Solución
 
 > ### Notas
 >
