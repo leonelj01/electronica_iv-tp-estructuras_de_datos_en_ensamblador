@@ -310,7 +310,8 @@ del mismo. Estos son:
 
 ### Solución
 
-La solución está en lib/arreglo/arreglo.S
+***La solución está en lib/arreglo/arreglo.S***
+
 ## Pila
 
 Una pila es una estructura de datos que permite guardar y recuperar información
@@ -358,6 +359,17 @@ int Pila_push(Pila *descriptor, int32_t valor);
 int Pila_pop(Pila *descriptor, int32_t *destino);
 ```
 ### Análisis del problema
+La `Pila` es una estructura tipo LIFO (Last In First Out), en la cual los datos que van entrando se van "apilando" uno sobre el otro
+y las unicas funciones que se pueden realizar en esta son agregar un dato(`push`) y quitar el dato (`pop`).El descriptor de esta 
+estructura esta formado 3 parametros, donde cada uno ocupa 4 bit:
+***Base(0):*** es la direccion del primer elemento de memoria.
+***Limite(4):*** es la direccion del ultimo elemento de memoria.
+***puntero(8):*** es la direccion del ultimo dato ingresado.
+Para saber cuando la pila esta llena o vacía debemos tener en cuenta donde se encuentra el puntero, por lo tanto:
+* La `Pila` está vacía si $puntero = base$.
+* La `Pila` está llena si $puntero = limite$
+
+*Nota: esto solo vale si la `Pila` es ascendente pues si es descendente se debe tener en cuenta el concepto de `tope`. Este se encuentra en un lugar anterior al puntero y se puede utilizar para saber cuando la `Pila` esta llena.*
 ![](figuras/fig-6.png)
 ### Solución
 
@@ -435,7 +447,10 @@ int Cola_pone(Cola *descriptor, int32_t valor);
 int Cola_quita(Cola *descriptor, int32_t *destino);
 ```
 ### Análisis del problema
-La `Cola` es una estructura similar a la pila pero ésta es circular, es decir, una vez que uno de los punteros llega al limite de la `Cola` y se puede ingresar mas datos en esta la dirección que tomará el puntero será la de base. El descriptor de la `Cola` esta formado por 5 parametros los cuales cada uno es de 4 bytes:
+La `Cola` es una estructura similar a la pila pero el primer dato en entrar es el primero en salir (FIFO, First In First Out),
+ademas su forma de operar se considera un buffer circular, es decir, una vez que uno de los punteros llega al limite de la `Cola` 
+y si se puede ingresar mas datos en ésta la dirección que tomará el puntero será la de base. El descriptor de la `Cola` esta formado 
+por 5 parametros los cuales cada uno es de 4 bits:
 - ***Base (0):*** es la direccion del primer elemento de memoria.
 - ***Limite (4):*** es la direccion del ultimo elemento de memoria (en cantidad de elementos).
 - ***Escritura (8):*** es el puntero que indica el siguiente lugar a escribir (la posición anterior a este es el ultimo elemento).
@@ -443,7 +458,11 @@ La `Cola` es una estructura similar a la pila pero ésta es circular, es decir, 
 - ***Lleno (16):*** indica el estado en el que se encuentra la `Cola`.
 ![](figuras/fig-7.png)
 
-El funcionamiento de la `Cola` se basa en *Poner* y *Quitar* elementos de la misma. Para ello utilizamos los punteros de lectura (`lec`) y escritura (`esc`), cuando se pone un elemento en la `Cola` se carga el dato y `esc` se mueve a la derecha, de la misma forma cuando se quita un elemento `lec` se mueve a la derecha. Al quitar un elemento la "casilla" la `Cola` retorna el valor leído y donde estaba ubicado queda un espacio de *"memoria libre"*, donde no es que se borra el dato que habia sino que ya no tiene un significado y puede ser sobrescrito.
+El funcionamiento de la `Cola` se basa en *Poner* y *Quitar* elementos de la misma. Para ello utilizamos los punteros de lectura 
+(`lec`) y escritura (`esc`), cuando se pone un elemento en la `Cola` se carga el dato y `esc` se mueve a la derecha, de la misma 
+forma cuando se quita un elemento `lec` se mueve a la derecha. Al quitar un elemento la "casilla" la `Cola` retorna el valor leído 
+y donde estaba ubicado queda un espacio de *"memoria libre"*, donde no es que se borra el dato que habia sino que ya no tiene un 
+significado y puede ser sobrescrito.
 
 El estado de la `Cola` esta definido, no solo por ***Lleno*** sino que tambien se debe cumplir que los punteros de escritura y lectura coincidan.
 
