@@ -435,10 +435,21 @@ int Cola_pone(Cola *descriptor, int32_t valor);
 int Cola_quita(Cola *descriptor, int32_t *destino);
 ```
 ### Análisis del problema
+La `Cola` es una estructura similar a la pila pero ésta es circular, es decir, una vez que uno de los punteros llega al limite de la `Cola` y se puede ingresar mas datos en esta la dirección que tomará el puntero será la de base. El descriptor de la `Cola` esta formado por 5 parametros los cuales cada uno es de 4 bytes:
+- ***Base (0):*** es la direccion del primer elemento de memoria.
+- ***Limite (4):*** es la direccion del ultimo elemento de memoria (en cantidad de elementos).
+- ***Escritura (8):*** es el puntero que indica el siguiente lugar a escribir (la posición anterior a este es el ultimo elemento).
+- ***Lectura (12):*** es el puntero que indica el siguiente elemento a leer (la posicion del puntero indica el primer elemento de la `Cola`).
+- ***Lleno (16):*** indica el estado en el que se encuentra la `Cola`.
 ![](figuras/fig-7.png)
 
-![](figuras/fig-8.png)
+El funcionamiento de la `Cola` se basa en *Poner* y *Quitar* elementos de la misma. Para ello utilizamos los punteros de lectura (`lec`) y escritura (`esc`), cuando se pone un elemento en la `Cola` se carga el dato y `esc` se mueve a la derecha, de la misma forma cuando se quita un elemento `lec` se mueve a la derecha. Al quitar un elemento la "casilla" la `Cola` retorna el valor leído y donde estaba ubicado queda un espacio de *"memoria libre"*, donde no es que se borra el dato que habia sino que ya no tiene un significado y puede ser sobrescrito.
 
+El estado de la `Cola` esta definido, no solo por ***Lleno*** sino que tambien se debe cumplir que los punteros de escritura y lectura coincidan.
+
+* La `Cola` esta vacía si: $lleno = 0$ y $lec = esc$
+* La `Cola` esta llena si: $lleno = 1$ y $lec = esc$
+![](figuras/fig-8.png)
 ![](figuras/fig-9.png)
 ### Solución
 
