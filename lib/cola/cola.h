@@ -27,7 +27,7 @@ typedef struct Cola {
      * @brief Dirección de la posición del dato más antiguo no leído 
      * 
      */
-    int32_t *pLectura;
+    int32_t *pLectura; 
 
     /**
      * @brief Indica cola llena, cuando pEscritura == pLectura, 1 indica cola
