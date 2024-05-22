@@ -310,12 +310,136 @@ del mismo. Estos son:
 
 ### Solución
 
+La solución está en lib/arreglo/arreglo.S
 ## Pila
+
+Una pila es una estructura de datos que permite guardar y recuperar información
+de modo que el primer dato guardado es el último recuperado (por su sigla en
+ingles LIFO, Last In First Out). Una pila implementa las operaciones *push* y
+*pop*. La operación *push* ingresa un dato en la pila, mientras que la operación
+*pop* quita el último dato ingresado de la pila y retorna su valor.
+En este problema implementaremos una pila de enteros de 32 bit. La información
+sobre la memoria reservada y el estado de la pila se mantendrán en un
+descriptor.
+
+```c
+typedef struct Pila{
+    int32_t *base; // Primera posición de la memoria reservada
+    int32_t *limite; // Dirección de la primera posición inválida de memoria
+    int32_t *puntero; // Dirección del último dato insertado con push
+}Pila;
+
+/**
+ * @brief Inicializa un descriptor de pila. Inicialmente la pila está vacía
+ * 
+ * @param descriptor Descriptor a inicializar
+ * @param base Dirección base (menor dirección) de la pila
+ * @param capacidad Capacidad de la pila (en elementos)
+ */
+void Pila_init(Pila *descriptor, int32_t *base, size_t capacidad);
+
+/**
+ * @brief Ingresa un valor en la pila descrita
+ * 
+ * @param descriptor Descriptor de pila
+ * @param valor Valor a ingresar
+ * @return int 0 si la operación se realizó, -1 si la pila estaba llena
+ */
+int Pila_push(Pila *descriptor, int32_t valor);
+
+/**
+ * @brief Quita el último elemento de la pila descrita y copia su valor en
+ * destino
+ * 
+ * @param descriptor Descriptor de pila
+ * @param destino Dirección de la variable de destino
+ * @return int 0 si la operación se realizó, -1 si la pila estaba vacía
+ */
+int Pila_pop(Pila *descriptor, int32_t *destino);
+```
 ### Análisis del problema
+![](figuras/fig-6.png)
 ### Solución
 
 ## Cola
+
+Una cola es una estructura de datos que permite almacenar temporalmente
+información para un posterior uso. A diferencia de una pila, en una cola el
+primer dato en entrar será también el primero en salir (por su sigla en inglés
+FIFO, First In First Out). Las colas son utilizadas para almacenar datos en
+espera a ser procesados, de forma similar a cuando hacemos cola en una
+ventanilla para hacer un trámite. En este problema implementarás una cola de
+enteros de 32 bit que soporte las siguientes operaciones:
+
+- *pone*: Pone un nuevo elemento en la cola
+- *quita*: Quita el elemento más antiguo de la cola, retornando su valor
+
+```c
+typedef struct Cola {
+    /**
+     * @brief Dirección de la primera posición de la memoria reservada
+     */
+    int32_t *base;
+
+    /**
+     * @brief Dirección de la posición siguiente a la última posición reservada 
+     */
+    int32_t *limite;
+
+    /**
+     * @brief Dirección de la posición donde se va a escribir el proximo dato
+     */
+    int32_t *pEscritura;
+    
+    /**
+     * @brief Dirección de la posición del dato más antiguo no leído 
+     */
+    int32_t *pLectura; 
+
+    /**
+     * @brief Indica cola llena, cuando pEscritura == pLectura, 1 indica cola
+     * llena y 0 indica cola vacía.
+     * 
+     * @note el tipo bool se implementa como entero de 8 bit pero solo puede
+     * contener valores 0 y 1
+     */
+    bool llena;
+}Cola;
+
+/**
+ * @brief Inicializa un descriptor de cola
+ * 
+ * @param descriptor Descriptor
+ * @param base Dirección base de memoria
+ * @param tamano Tamano de memoria para la cola
+ */
+void Cola_init(Cola *descriptor, int32_t *base,int tamano);
+
+/**
+ * @brief Pone un nuevo valor en cola.
+ * 
+ * @param descriptor Descriptor de cola
+ * @param valor Valor a introducir
+ * @return int 0 si la operación fue exitosa. -1 si la cola estaba llena.
+ */
+int Cola_pone(Cola *descriptor, int32_t valor);
+
+/**
+ * @brief Quita el elemento más antiguo de la cola y escribe su valor en 
+ * destino.
+ * 
+ * @param descriptor Descriptor de cola
+ * @param destino Puntero a variable donde guardar el valor quitado
+ * @return int 0 si la operación tuvo éxito. -1 si la cola estaba vacía.
+ */
+int Cola_quita(Cola *descriptor, int32_t *destino);
+```
 ### Análisis del problema
+![](figuras/fig-7.png)
+
+![](figuras/fig-8.png)
+
+![](figuras/fig-9.png)
 ### Solución
 
 > ### Notas
