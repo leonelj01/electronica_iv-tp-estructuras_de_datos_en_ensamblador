@@ -28,13 +28,15 @@
  * @param tamano Tamano de memoria para la cola
  */
 defun Cola_init
-    push {r4-r5,lr}
+    // r0: descriptor, r1: base, r2: tamaño de memoria 
     str r1, [r0, #Cola_base]
+    add r2, r1, r2, lsl #2
     str r2, [r0, #Cola_limite]
-    str r3, [r0, #Cola_pEscritura]
-    str r4, [r0, #Cola_pLectura]
-    str r5, [r0, #Cola_lleno]
-    pop {r4-r5,pc}
+    str r1, [r0, #Cola_pEscritura]
+    str r1, [r0, #Cola_pLectura]
+    mov r3, #0
+    str r3, [r0, #Cola_lleno]
+    bx lr
 endfun Cola_init
 
 /**
@@ -44,7 +46,26 @@ endfun Cola_init
  * @param valor Valor a introducir
  * @return int 0 si la operación fue exitosa. -1 si la cola estaba llena.
  */
-defun Cola_pone //r0: descriptor, r1: valor
+defun Cola_pone 
+    //r0: descriptor, r1: valor
+    ldr r2,[r0,#Cola_pEscritura]
+    ldr r3,[r0,#Cola_pLectura]
+    cmp r2,r3
+    beq lleno 
+
+escribe:
+
+
+salida:
+    bx lr
+
+lleno:
+    ldr r12,[r0,#Cola_lleno]
+    cmp r12, #0
+    beq escribe
+
+    mov r0, #-1
+    b   salida
 
 endfun Cola_pone
 /**
@@ -56,6 +77,23 @@ endfun Cola_pone
  * @return int 0 si la operación tuvo éxito. -1 si la cola estaba vacía.
  */
 defun Cola_quita
-    mov r0,-1
+    // r0: descriptor, r1: destino
+    ldr r2,[r0,#Cola_pEscritura]
+    ldr r3,[r0,#Cola_pLectura]
+    cmp r3,r2
+    beq vacia 
+
+quita:
+
+
+salida_1:
     bx lr
+
+vacia:
+    ldr r12,[r0,#Cola_lleno]
+    cmp r12, #0
+    bne quita
+
+    mov r0, #-1
+    b   salida_1
 endfun Cola_quita

@@ -468,7 +468,8 @@ El estado de la `Cola` esta definido, no solo por ***Lleno*** sino que tambien s
 
 * La `Cola` esta vacía si: $lleno = 0$ y $lec = esc$
 * La `Cola` esta llena si: $lleno = 1$ y $lec = esc$
-![](figuras/fig-8.png)
+
+![](figuras/fig-8.png) 
 ![](figuras/fig-9.png)
 ### Solución
 

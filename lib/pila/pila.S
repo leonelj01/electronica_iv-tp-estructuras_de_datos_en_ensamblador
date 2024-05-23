@@ -25,10 +25,10 @@
  * @param capacidad Capacidad de la pila (en elementos)
  */
 defun Pila_init
+    // r0: descriptor, r1: base, r2: capacidad
+    add r2, r1, r2, lsl #2
     str r1, [r0,#Pila_base]
-    add r2, r1, r2, lsl #4
     str r2, [r0,#Pila_limite]
-    mov r3, r1
     str r3, [r0,#Pila_puntero]
     bx lr
 endfun Pila_init
@@ -42,23 +42,22 @@ endfun Pila_init
  */
 defun Pila_push
     // r0: descriptor, r1: valor a ingresar
-    ldr r2,[r0,#Pila_puntero]
-    ldr r3,[r0,#Pila_limite]
-    cmp r2,r3
-    beq llena
+    ldr r2, [r0,#Pila_puntero]
+    ldr r3, [r0,#Pila_limite]
+    cmp r3,r2
+    bhs 1f
 
-    
 
-    ldrb r3,[r1],#1
-    strb r3,[r2],#1
+    ldrb r3,[r2]
+    strb r3,[r1],#4
     mov r0, #0
-
-salida:
+ 
+0:
     bx lr
 
-llena:
-    mov r0,#-1
-    b   salida
+1:
+    mov r0, #-1
+    b   0b
 endfun Pila_push
 
 /**
@@ -73,12 +72,9 @@ defun Pila_pop
     ldr r2,[r0,#Pila_puntero]
     ldr r3,[r0,#Pila_base]
     cmp r2,r3
-    beq vacia
+    ble vacia
 
-    ldrb r0,[r2]
-
-    ldrb r1,[r2],#-1
-    strb r1,[r0],#-1
+    strb r1,[r2],#-4
     mov  r0,#0
 
 salida_1:
