@@ -48,8 +48,8 @@ defun Pila_push
     bhs 1f
 
 
-    ldrb r3,[r2]
-    strb r3,[r1],#4
+    ldrb r3,[r1]
+    strb r3,[r2],#4
     mov r0, #0
  
 0:
@@ -69,12 +69,15 @@ endfun Pila_push
  * @return int 0 si la operación se realizó, -1 si la pila estaba vacía
  */
 defun Pila_pop
+    // r0: descriptor, r1: destino
     ldr r2,[r0,#Pila_puntero]
     ldr r3,[r0,#Pila_base]
     cmp r2,r3
     ble vacia
 
-    strb r1,[r2],#-4
+
+    ldrb r3,[r2],#-4
+    strb r3,[r1]
     mov  r0,#0
 
 salida_1:

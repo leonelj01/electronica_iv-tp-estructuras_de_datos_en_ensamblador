@@ -51,22 +51,18 @@ defun Cola_pone
     ldr r2,[r0,#Cola_pEscritura]
     ldr r3,[r0,#Cola_pLectura]
     cmp r2,r3
-    beq lleno 
+    bne 1f
 
-escribe:
+    ldr r3,[r0,#Cola_lleno]
+    cbz r3, 1f
+    
+    mov r0,#-1
+    b   0f
 
-
-salida:
+1:
+    mov r0,#0
+0:
     bx lr
-
-lleno:
-    ldr r12,[r0,#Cola_lleno]
-    cmp r12, #0
-    beq escribe
-
-    mov r0, #-1
-    b   salida
-
 endfun Cola_pone
 /**
  * @brief Quita el elemento más antiguo de la cola y escribe su valor en 
@@ -80,20 +76,18 @@ defun Cola_quita
     // r0: descriptor, r1: destino
     ldr r2,[r0,#Cola_pEscritura]
     ldr r3,[r0,#Cola_pLectura]
-    cmp r3,r2
-    beq vacia 
+    cmp r2,r3
+    bne 1f
 
-quita:
+    ldr r3,[r0,#Cola_lleno]
+    cbnz r3, 1f
+    
+    mov r0,#-1
+    b   0f
 
+1:
+    mov r0,#0
 
-salida_1:
+0:
     bx lr
-
-vacia:
-    ldr r12,[r0,#Cola_lleno]
-    cmp r12, #0
-    bne quita
-
-    mov r0, #-1
-    b   salida_1
 endfun Cola_quita
