@@ -47,9 +47,9 @@ defun Pila_push
     cmp r3,r2
     bhs 1f
 
-
-    ldrb r3,[r1]
-    strb r3,[r2],#4
+    add r2,#4
+    str r1,[r2]
+    str r2,[r0,#Pila_puntero]
     mov r0, #0
  
 0:
@@ -73,17 +73,18 @@ defun Pila_pop
     ldr r2,[r0,#Pila_puntero]
     ldr r3,[r0,#Pila_base]
     cmp r2,r3
-    ble vacia
+    bls 0f
 
-
-    ldrb r3,[r2],#-4
-    strb r3,[r1]
+    add r2,#-4
+    ldr r3,[r2]
+    str r3,[r1]
+    str r2,[r0,#Pila_puntero]
     mov  r0,#0
 
-salida_1:
+1:
     bx lr
 
-vacia:
+0:
     mov r0,#-1
-    b   salida_1
+    b   1b
 endfun Pila_pop

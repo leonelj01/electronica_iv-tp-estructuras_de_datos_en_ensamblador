@@ -456,6 +456,7 @@ por 5 parametros los cuales cada uno es de 4 bits:
 - ***Escritura (8):*** es el puntero que indica el siguiente lugar a escribir (la posición anterior a este es el ultimo elemento).
 - ***Lectura (12):*** es el puntero que indica el siguiente elemento a leer (la posicion del puntero indica el primer elemento de la `Cola`).
 - ***Lleno (16):*** indica el estado en el que se encuentra la `Cola`.
+
 ![](figuras/fig-7.png)
 
 El funcionamiento de la `Cola` se basa en *Poner* y *Quitar* elementos de la misma. Para ello utilizamos los punteros de lectura 

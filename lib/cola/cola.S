@@ -29,8 +29,8 @@
  */
 defun Cola_init
     // r0: descriptor, r1: base, r2: tamaño de memoria 
-    str r1, [r0, #Cola_base]
     add r2, r1, r2, lsl #2
+    str r1, [r0, #Cola_base]
     str r2, [r0, #Cola_limite]
     str r1, [r0, #Cola_pEscritura]
     str r1, [r0, #Cola_pLectura]
@@ -48,21 +48,37 @@ endfun Cola_init
  */
 defun Cola_pone 
     //r0: descriptor, r1: valor
-    ldr r2,[r0,#Cola_pEscritura]
-    ldr r3,[r0,#Cola_pLectura]
-    cmp r2,r3
-    bne 1f
+    push {r4-r5,lr}
+    ldr r2,[r0,#Cola_lleno]
+    cbnz r2, 1f
+    ldr r3,[r0,#Cola_pEscritura]
+    ldr r4,[r0,#Cola_pLectura]
+    ldr r5,[r0,#Cola_limite]
 
-    ldr r3,[r0,#Cola_lleno]
-    cbz r3, 1f
-    
-    mov r0,#-1
+    str r1,[r3],#4
+    cmp r3,r5
+    bne 3f
+    ldr r5,[r0,#Cola_base]
+    mov r3,r5
+
+3:
+    cmp r3,r4
+    beq 2f
+    str r3,[r0,#Cola_pEscritura]
+    mov r0,#0
+    b   0f
+
+2:
+    mov r2,#1
+    str r2,[r0,#Cola_lleno]
+    str r3,[r0,#Cola_pEscritura]
+    mov r0,#0
     b   0f
 
 1:
-    mov r0,#0
+    mov r0,#-1
 0:
-    bx lr
+    pop {r4-r5,pc}
 endfun Cola_pone
 /**
  * @brief Quita el elemento más antiguo de la cola y escribe su valor en 
@@ -74,20 +90,32 @@ endfun Cola_pone
  */
 defun Cola_quita
     // r0: descriptor, r1: destino
-    ldr r2,[r0,#Cola_pEscritura]
-    ldr r3,[r0,#Cola_pLectura]
-    cmp r2,r3
-    bne 1f
+    push {r4-r6,lr}
+    ldr r2,[r0,#Cola_lleno]
+    cbz r2, 1f
+    ldr r3,[r0,#Cola_pEscritura]
+    ldr r4,[r0,#Cola_pLectura]
+    ldr r5,[r0,#Cola_limite]
 
-    ldr r3,[r0,#Cola_lleno]
-    cbnz r3, 1f
-    
-    mov r0,#-1
+2:
+    ldr r6,[r4],#4
+    str r6,[r1]
+    cmp r4,r5
+    bne 3f
+    ldr r5,[r0,#Cola_base]
+    mov r4,r5
+    mov r2,#0
+    str r2,[r0,#Cola_lleno]
+
+3:
+    str r4,[r0,#Cola_pLectura]
+    mov r0,#0
     b   0f
 
 1:
-    mov r0,#0
-
+    cmp r3,r4
+    bne 2b
+    mov r0,#-1
 0:
-    bx lr
+    pop {r4-r6,pc}
 endfun Cola_quita
