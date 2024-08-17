@@ -29,7 +29,7 @@ defun Pila_init
     add r2, r1, r2, lsl #2
     str r1, [r0,#Pila_base]
     str r2, [r0,#Pila_limite]
-    str r3, [r0,#Pila_puntero]
+    str r1, [r0,#Pila_puntero]
     bx lr
 endfun Pila_init
 
@@ -44,20 +44,20 @@ defun Pila_push
     // r0: descriptor, r1: valor a ingresar
     ldr r2, [r0,#Pila_puntero]
     ldr r3, [r0,#Pila_limite]
-    cmp r3,r2
-    bhs 1f
+    cmp r2,r3
+    bhs 0f
 
+    str r1, [r2]
     add r2,#4
-    str r1,[r2]
     str r2,[r0,#Pila_puntero]
     mov r0, #0
+    b 1f
  
 0:
-    bx lr
+    mov r0, #-1
 
 1:
-    mov r0, #-1
-    b   0b
+    bx lr
 endfun Pila_push
 
 /**
@@ -75,16 +75,17 @@ defun Pila_pop
     cmp r2,r3
     bls 0f
 
-    add r2,#-4
-    ldr r3,[r2]
-    str r3,[r1]
+    sub r2,#4
+    ldr r12,[r2]
+    str r12,[r1]
     str r2,[r0,#Pila_puntero]
-    mov  r0,#0
+    mov r0,#0
+    b 1f
+
+0:
+    mov r0,#-1
 
 1:
     bx lr
 
-0:
-    mov r0,#-1
-    b   1b
 endfun Pila_pop

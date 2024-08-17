@@ -49,36 +49,42 @@ endfun Cola_init
 defun Cola_pone 
     //r0: descriptor, r1: valor
     push {r4-r5,lr}
-    ldr r2,[r0,#Cola_lleno]
-    cbnz r2, 1f
-    ldr r3,[r0,#Cola_pEscritura]
-    ldr r4,[r0,#Cola_pLectura]
-    ldr r5,[r0,#Cola_limite]
+    ldr r2,  [r0,#Cola_limite]
+    ldr r3,  [r0,#Cola_pEscritura]
+    ldr r4,  [r0,#Cola_pLectura]
+    ldr r5,  [r0,#Cola_base]
+    ldr r12, [r0,#Cola_lleno]
 
-    str r1,[r3],#4
-    cmp r3,r5
-    bne 3f
-    ldr r5,[r0,#Cola_base]
-    mov r3,r5
-
-3:
-    cmp r3,r4
+    cmp r12,#0
+    bne 1f
+    str r1, [r3]
+    add r3, #4
+    cmp r3,r2
     beq 2f
-    str r3,[r0,#Cola_pEscritura]
-    mov r0,#0
-    b   0f
 
-2:
-    mov r2,#1
-    str r2,[r0,#Cola_lleno]
-    str r3,[r0,#Cola_pEscritura]
-    mov r0,#0
-    b   0f
+    0:
+        cmp r3,r4
+        beq 3f
+        str r3, [r0,#Cola_pEscritura]
+        mov r0,#0
+        b fin
 
-1:
-    mov r0,#-1
-0:
-    pop {r4-r5,pc}
+    1: 
+        mov r0,#-1
+        b fin
+
+    2:
+        mov r3,r5
+        b 0b
+
+    3:
+        mov r12,#1
+        str r12, [r0,#Cola_lleno]
+        str r3,  [r0,#Cola_pEscritura]
+        mov r0,#0
+
+    fin:
+        pop {r4-r5,pc}
 endfun Cola_pone
 /**
  * @brief Quita el elemento más antiguo de la cola y escribe su valor en 
@@ -91,31 +97,39 @@ endfun Cola_pone
 defun Cola_quita
     // r0: descriptor, r1: destino
     push {r4-r6,lr}
-    ldr r2,[r0,#Cola_lleno]
-    cbz r2, 1f
-    ldr r3,[r0,#Cola_pEscritura]
-    ldr r4,[r0,#Cola_pLectura]
-    ldr r5,[r0,#Cola_limite]
+    ldr r2,  [r0,#Cola_limite]
+    ldr r3,  [r0,#Cola_pEscritura]
+    ldr r4,  [r0,#Cola_pLectura]
+    ldr r5,  [r0,#Cola_base]
+    ldr r12, [r0,#Cola_lleno]
 
-2:
-    ldr r6,[r4],#4
-    str r6,[r1]
-    cmp r4,r5
-    bne 3f
-    ldr r5,[r0,#Cola_base]
-    mov r4,r5
-    mov r2,#0
-    str r2,[r0,#Cola_lleno]
+    cmp r12,#1
+    bne 1f
+    mov r12,#0
+    str r12,[r0,#Cola_lleno]
 
-3:
-    str r4,[r0,#Cola_pLectura]
+0:
+    ldr r6, [r4]
+    str r6, [r1]
+    add r4,#4
+    cmp r4,r2
+    beq 2f
+    str r4, [r0,#Cola_pLectura]
     mov r0,#0
-    b   0f
+    b final
 
 1:
     cmp r3,r4
-    bne 2b
+    bne 0b
     mov r0,#-1
-0:
+    b final
+
+2:
+    mov r4,r5
+    str r4, [r0,#Cola_pLectura]
+    mov r0,#0
+    b final
+
+final:
     pop {r4-r6,pc}
 endfun Cola_quita
